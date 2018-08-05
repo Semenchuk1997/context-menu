@@ -34,6 +34,10 @@ class ContextMenu {
         this.menuBuilder(this.data);
     }
 
+    /**
+     * get data with XMLHttpRequest
+     * return promise
+     */
     getData() {
         return new Promise((resolve, reject) => {
             let xhr = new XMLHttpRequest();
@@ -51,8 +55,12 @@ class ContextMenu {
         });
     }
 
+    /**
+     *
+     * @param {object} data
+     * receive object with data and render context menu on the page
+     */
     menuBuilder(data) {
-        //create context menu
         this.contextMenu = document.createElement('div');
         this.contextMenu.classList.add('context-menu');
 
@@ -68,8 +76,10 @@ class ContextMenu {
         up.classList.add('arrow', 'up');
         down.classList.add('arrow', 'down');
 
-        up.innerHTML = `&#9650;`;
-        down.innerHTML = `&#9660;`;
+        up.style.visibility = 'hidden';
+
+        up.innerHTML = `&#9650;`; // ▲
+        down.innerHTML = `&#9660;`; //▼
 
         up.addEventListener('click', this.scrollHandler.bind(this));
         down.addEventListener('click', this.scrollHandler.bind(this));
@@ -88,6 +98,11 @@ class ContextMenu {
         this.fitExpand(coords);
     }
 
+    /**
+     *
+     * @param {object} data
+     * receive object with data and generate ul list with sublists
+     */
     generateList(data) {
         const ul = document.createElement('ul');
         for(let key in data){
@@ -113,19 +128,25 @@ class ContextMenu {
         return ul;
     }
 
+    /**
+     *
+     * @param {event} e
+     * select elements under cursor and open sublists
+     */
     enterElement(e) {
         const elem = e.target;
 
         elem.classList.add('select');
 
         if(elem.classList.contains('parent')) {
-            const sublist = elem.querySelector('.sublist'),
-                liHeight = sublist.firstElementChild.offsetHeight;
+            const sublist = elem.querySelector('.sublist');
 
             sublist.style.display = 'block';
 
-            const coords = this.getCoords(sublist);
+            const liHeight = sublist.querySelector('li').offsetHeight,
+                coords = this.getCoords(sublist);
 
+            //decide which side choose for sublist
             if(coords.right + 200 > document.documentElement.clientWidth) {
                 sublist.style.right = sublist.offsetWidth + 'px';
             } else {
@@ -155,6 +176,11 @@ class ContextMenu {
         elem.removeEventListener('mouseenter', this.enterElement);
     }
 
+    /**
+     *
+     * @param {event} e
+     * scroll up/down context menu items
+     */
     scrollHandler(e) {
         const elem = document.querySelector('.options'),
             liHeight = elem.firstElementChild.offsetHeight,
@@ -164,17 +190,25 @@ class ContextMenu {
             menuCoords = this.getCoords(this.contextMenu);
 
         if(e.target.classList.contains('down')) {
+
             if(listCoords.bottom > menuCoords.bottom) {
                 elem.style.top = parseInt(top, 10) - liHeight + 'px';
-            } else {
-                // console.log('work')
-                // const arrowDown = document.querySelector('.arrow.down');
-                // arrowDown.innerHTML = '';
-                // arrowDown.classList.remove('arrow');
+                document.querySelector('.arrow.up').style.visibility = 'visible';
             }
-        } else {
+
+            if(listCoords.bottom <= menuCoords.bottom + liHeight) {
+                document.querySelector('.arrow.down').style.visibility = 'hidden';
+            }
+
+        } else if(e.target.classList.contains('up')) {
+
             if(listCoords.top < menuCoords.top) {
                 elem.style.top = parseInt(top, 10) + liHeight + 'px';
+                document.querySelector('.arrow.down').style.visibility = 'visible';
+            }
+
+            if(listCoords.top === menuCoords.top) {
+                document.querySelector('.arrow.up').style.visibility = 'hidden';
             }
         }
 
@@ -199,13 +233,18 @@ class ContextMenu {
         }
     }
 
+    /**
+     *
+     * @param {HTMLUlElement} elem
+     * kind of overflow: hidden; for context menu. Becouse with that css property it work incorrectly
+     */
     hideOverFlow(elem) {
         for(let i = 0; i < elem.children.length; i++) {
             elem.children[i].style.visibility = 'visible';
 
             const liCoords = this.getCoords(elem.children[i]);
 
-            if(liCoords.bottom > this.coord.top + this.contextMenu.offsetHeight || liCoords.top < this.coord.top) {
+            if(liCoords.bottom > this.contextMenu.offsetTop + this.contextMenu.offsetHeight || liCoords.top < this.contextMenu.offsetTop) {
                 elem.children[i].style.visibility = 'hidden';
             }
         }
@@ -217,15 +256,25 @@ class ContextMenu {
         }
 
         if(coords.bottom > document.documentElement.clientHeight) {
-            this.contextMenu.style.top = this.coord.top - this.contextMenu.offsetHeight + 'px'
+            this.contextMenu.style.top = this.coord.top - this.contextMenu.offsetHeight + 'px';
         }
     }
 
+    /**
+     *
+     * @param {HTMLElement} menu
+     * set position for context menu
+     */
     setPosition(menu) {
         menu.style.left = this.coord.left + 'px';
         menu.style.top = this.coord.top + 'px';
     }
 
+    /**
+     *
+     * @param {HTMLElement} elem
+     * return object with element coordinats
+     */
     getCoords(elem) {
         let box = elem.getBoundingClientRect();
 

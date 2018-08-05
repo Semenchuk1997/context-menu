@@ -19,6 +19,8 @@ body {
     display: none;
     cursor: pointer;
     background-color: #ddd;
+    -moz-user-select: none;
+    user-select: none;
 }
 
 .options {
@@ -29,7 +31,6 @@ body {
 
 .sublist {
     width: 150px;
-    /* max-height: 195px; */
     position: absolute;
     display: none;
     top: 0;
@@ -78,4 +79,10 @@ body {
     background-color: #eee;
     color: #aaa;
     cursor: not-allowed;
+}
+
+@-moz-document url-prefix() {
+    .context-menu {
+        height: 200px;
+    }
 }
