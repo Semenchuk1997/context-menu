@@ -7,9 +7,6 @@ class ContextMenu {
         this.menuVisible = false;
 
         this.root = document.querySelector('.root');
-
-        this.showMenu = this.root.addEventListener('contextmenu', this.contextMenuHandles.bind(this), false);
-        this.hideMenu = window.addEventListener('click', this.hideMenu.bind(this), false);
     }
 
     async contextMenuHandles(e) {
@@ -29,9 +26,12 @@ class ContextMenu {
 
         if(this.menuVible) {
             this.removeNode();
+            window.removeEventListener('click', this.hideMenu.bind(this), false);
         }
 
         this.menuBuilder(this.data);
+
+        window.addEventListener('click', this.hideMenu.bind(this), false);
     }
 
     /**
@@ -288,3 +288,6 @@ class ContextMenu {
 }
 
 const contextMenu = new ContextMenu();
+
+const root = document.querySelector('.root');
+root.addEventListener('contextmenu', contextMenu.contextMenuHandles.bind(contextMenu), false);
